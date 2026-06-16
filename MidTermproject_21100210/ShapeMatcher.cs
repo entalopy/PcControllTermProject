@@ -41,12 +41,17 @@ namespace MidTermproject_21100210
             // 대응점 계산은 여기서 시작한다.
             // 먼저 마스크에 가장 잘 맞는 회전 후보를 고르고, 그 후보로 빨간점 6개를 마스크 픽셀 좌표로 변환한다.
             ShapeFeatures oriented = ChooseBestOrientation(model, maskFeatures);
-            LastOrientedFeatures = oriented;
             List<BoundarySample> boundarySamples = BuildBoundarySamples(oriented);
+            oriented = ApplyMaxPairBallLines(oriented, boundarySamples);
+            LastOrientedFeatures = oriented;
             var debug = new StringBuilder();
             debug.AppendLine("=== Boundary-based point matching ===");
             debug.AppendFormat(CultureInfo.InvariantCulture, "boundary samples: {0}", boundarySamples.Count);
             debug.AppendLine();
+            if (boundarySamples.Count >= 2)
+            {
+                debug.AppendLine("ball lines: max1-left to max1-right, max2-left to max2-right");
+            }
 
             var result = new PointF[model.MeasurementPoints.Length];
             int boundarySuccessCount = 0;
@@ -624,6 +629,31 @@ namespace MidTermproject_21100210
             }
 
             return false;
+        }
+
+        private static ShapeFeatures ApplyMaxPairBallLines(ShapeFeatures source, List<BoundarySample> maxPairSamples)
+        {
+            if (maxPairSamples == null || maxPairSamples.Count < 2)
+            {
+                return source;
+            }
+
+            maxPairSamples.Sort((a, b) => a.T.CompareTo(b.T));
+            BoundarySample front = maxPairSamples[0];
+            BoundarySample rear = maxPairSamples[1];
+            ShapeFeatures result = WithAxisSigns(source, 1, 1);
+            result.FrontBallLineStart = ToPoint2f(front.Left);
+            result.FrontBallLineEnd = ToPoint2f(front.Right);
+            result.RearBallLineStart = ToPoint2f(rear.Left);
+            result.RearBallLineEnd = ToPoint2f(rear.Right);
+            result.FrontBallWidth = front.Width;
+            result.RearBallWidth = rear.Width;
+            return result;
+        }
+
+        private static Point2f ToPoint2f(PointF point)
+        {
+            return new Point2f(point.X, point.Y);
         }
 
         private PointF TransformByShapeLocation(ShapeFeatures maskFeatures, ShapePointLocation loc)
