@@ -4,6 +4,8 @@
 
 ## 구성
 
+- `MidTermproject_21100210.slnx`: C# WinForms + OpenCvSharp 원본 솔루션입니다.
+- `MidTermproject_21100210/`: 마스크 분석/매칭/렌더링을 담당하는 C# 프로젝트 소스입니다.
 - `analyze_labeled_results.py`: 라벨링 결과 파일을 읽어서 정확도, 가설 검정, 포인트 오차 요약을 생성합니다.
 - `labeled_results_visual_tool.py`: 브라우저에서 결과 파일을 드래그 앤 드롭해 시각적으로 확인하는 도구입니다.
 - `build_check/`: 실행 확인용 빌드 산출물과 필요한 DLL 파일이 들어 있습니다.
@@ -63,6 +65,22 @@ build_check\MidTermproject_21100210.exe
 ```
 
 같은 폴더와 하위 `dll\x64` 폴더에 실행에 필요한 DLL이 함께 있으므로, 실행 파일만 따로 옮기지 말고 `build_check` 폴더 구조를 유지해야 합니다.
+
+## C# 프로젝트 실행/수정
+
+Visual Studio에서 아래 솔루션 파일을 열면 WinForms 프로젝트를 수정할 수 있습니다.
+
+```text
+MidTermproject_21100210.slnx
+```
+
+명령줄에서 빌드하려면 다음 명령을 사용할 수 있습니다.
+
+```powershell
+dotnet msbuild MidTermproject_21100210\MidTermproject_21100210.csproj /p:Configuration=Debug /p:Platform=AnyCPU
+```
+
+이번 버전부터 빨간점 6개 대응은 기존 PCA 단면 방식만 쓰지 않고, “좌우 외곽선 분리 기반 점 대응 알고리즘(Boundary-based point matching)”을 우선 사용합니다. boundary 방식이 실패하면 기존 `TransformByShapeLocation()` 방식으로 자동 fallback됩니다.
 
 ## GitHub 업로드
 
