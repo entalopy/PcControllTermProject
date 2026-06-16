@@ -22,6 +22,20 @@ namespace MidTermproject_21100210
             public float Width { get; set; }
         }
 
+        private sealed class ProjectedBoundaryPoint
+        {
+            public float T { get; set; }
+            public float Side { get; set; }
+            public PointF Point { get; set; }
+        }
+
+        private sealed class ContourSample
+        {
+            public float T { get; set; }
+            public float Side { get; set; }
+            public PointF Point { get; set; }
+        }
+
         public PointF[] Match(ShapeModel model, ShapeFeatures maskFeatures)
         {
             // 대응점 계산은 여기서 시작한다.
@@ -312,92 +326,117 @@ namespace MidTermproject_21100210
             }
 
             const int sampleCount = 100;
-            float minAlong = -features.Width / 2f;
-            float maxAlong = features.Width / 2f;
-            float span = Math.Max(maxAlong - minAlong, 1f);
-            float[] tolerances =
+            List<ProjectedBoundaryPoint> boundaryPoints = ProjectBoundaryPoints(features, GetBoundaryPoints(mask));
+            if (boundaryPoints.Count == 0)
             {
-                Math.Max(features.Width * 0.02f, 3f),
-                Math.Max(features.Width * 0.035f, 4f),
-                Math.Max(features.Width * 0.05f, 5f),
-                Math.Max(features.Width * 0.08f, 7f)
-            };
+                return samples;
+            }
 
-            for (int i = 0; i < sampleCount; i++)
+            var leftPoints = new List<ProjectedBoundaryPoint>();
+            var rightPoints = new List<ProjectedBoundaryPoint>();
+            foreach (ProjectedBoundaryPoint point in boundaryPoints)
             {
-                float t = sampleCount == 1 ? 0f : i / (float)(sampleCount - 1);
-                float targetAlong = minAlong + t * span;
-                BoundarySample sample;
-                if (TryBuildBoundarySample(features, mask, t, targetAlong, tolerances, out sample))
+                if (point.Side < 0f)
                 {
-                    samples.Add(sample);
+                    leftPoints.Add(point);
+                }
+                else
+                {
+                    rightPoints.Add(point);
                 }
             }
 
-            return samples;
+            List<ContourSample> leftContour = BuildContourSamples(leftPoints, true, sampleCount);
+            List<ContourSample> rightContour = BuildContourSamples(rightPoints, false, sampleCount);
+            if (leftContour.Count < 2 || rightContour.Count < 2)
+            {
+                return samples;
+            }
+
+            return BuildMaxPairSamples(leftContour, rightContour);
         }
 
-        private static bool TryBuildBoundarySample(
-            ShapeFeatures features,
-            Mat mask,
-            float t,
-            float targetAlong,
+        private static List<ProjectedBoundaryPoint> ProjectBoundaryPoints(ShapeFeatures features, List<CvPoint> boundaryPoints)
+        {
+            var result = new List<ProjectedBoundaryPoint>();
+            float minAlong = -features.Width / 2f;
+            float span = Math.Max(features.Width, 1f);
+
+            foreach (CvPoint point in boundaryPoints)
+            {
+                var rel = new Point2f(
+                    point.X - features.Center.X,
+                    point.Y - features.Center.Y);
+                float along = ShapeModel.Dot(rel, features.AxisX);
+                float side = ShapeModel.Dot(rel, features.AxisY);
+                float t = Clamp((along - minAlong) / span, 0f, 1f);
+
+                result.Add(new ProjectedBoundaryPoint
+                {
+                    T = t,
+                    Side = side,
+                    Point = new PointF(point.X, point.Y)
+                });
+            }
+
+            return result;
+        }
+
+        private static List<ContourSample> BuildContourSamples(List<ProjectedBoundaryPoint> contourPoints, bool isLeft, int sampleCount)
+        {
+            var result = new List<ContourSample>();
+            if (contourPoints == null || contourPoints.Count == 0)
+            {
+                return result;
+            }
+
+            contourPoints.Sort((a, b) => a.T.CompareTo(b.T));
+            float[] tolerances = { 0.015f, 0.025f, 0.04f, 0.06f, 0.09f };
+            for (int i = 0; i < sampleCount; i++)
+            {
+                float t = sampleCount == 1 ? 0f : i / (float)(sampleCount - 1);
+                ContourSample sample;
+                if (TryBuildContourSample(contourPoints, t, tolerances, isLeft, out sample))
+                {
+                    result.Add(sample);
+                }
+            }
+
+            return result;
+        }
+
+        private static bool TryBuildContourSample(
+            List<ProjectedBoundaryPoint> contourPoints,
+            float targetT,
             float[] tolerances,
-            out BoundarySample sample)
+            bool isLeft,
+            out ContourSample sample)
         {
             foreach (float tolerance in tolerances)
             {
-                float minSide = float.MaxValue;
-                float maxSide = float.MinValue;
-                PointF left = PointF.Empty;
-                PointF right = PointF.Empty;
-                int count = 0;
-
-                for (int y = 0; y < mask.Rows; y++)
+                ProjectedBoundaryPoint best = null;
+                foreach (ProjectedBoundaryPoint point in contourPoints)
                 {
-                    for (int x = 0; x < mask.Cols; x++)
+                    if (Math.Abs(point.T - targetT) > tolerance)
                     {
-                        if (mask.At<byte>(y, x) == 0)
-                        {
-                            continue;
-                        }
+                        continue;
+                    }
 
-                        var rel = new Point2f(
-                            x - features.Center.X,
-                            y - features.Center.Y);
-
-                        float along = ShapeModel.Dot(rel, features.AxisX);
-                        if (Math.Abs(along - targetAlong) > tolerance)
-                        {
-                            continue;
-                        }
-
-                        float side = ShapeModel.Dot(rel, features.AxisY);
-                        if (side < minSide)
-                        {
-                            minSide = side;
-                            left = new PointF(x, y);
-                        }
-
-                        if (side > maxSide)
-                        {
-                            maxSide = side;
-                            right = new PointF(x, y);
-                        }
-
-                        count++;
+                    if (best == null ||
+                        (isLeft && point.Side < best.Side) ||
+                        (!isLeft && point.Side > best.Side))
+                    {
+                        best = point;
                     }
                 }
 
-                if (count >= 2 && minSide < maxSide)
+                if (best != null)
                 {
-                    sample = new BoundarySample
+                    sample = new ContourSample
                     {
-                        T = t,
-                        Left = left,
-                        Right = right,
-                        Center = MidPoint(left, right),
-                        Width = maxSide - minSide
+                        T = targetT,
+                        Side = best.Side,
+                        Point = best.Point
                     };
                     return true;
                 }
@@ -407,7 +446,7 @@ namespace MidTermproject_21100210
             return false;
         }
 
-        private static bool TryGetBoundarySampleAtT(List<BoundarySample> samples, float t, out BoundarySample sample)
+        private static bool TryGetContourSampleAtT(List<ContourSample> samples, float t, out ContourSample sample)
         {
             sample = null;
             if (samples == null || samples.Count < 2)
@@ -421,11 +460,145 @@ namespace MidTermproject_21100210
                 return true;
             }
 
-            BoundarySample last = samples[samples.Count - 1];
+            ContourSample last = samples[samples.Count - 1];
             if (t >= last.T)
             {
                 sample = last;
                 return true;
+            }
+
+            for (int i = 0; i < samples.Count - 1; i++)
+            {
+                ContourSample a = samples[i];
+                ContourSample b = samples[i + 1];
+                if (t < a.T || t > b.T)
+                {
+                    continue;
+                }
+
+                float denom = Math.Max(b.T - a.T, 0.0001f);
+                float u = (t - a.T) / denom;
+                sample = new ContourSample
+                {
+                    T = t,
+                    Side = a.Side + (b.Side - a.Side) * u,
+                    Point = Lerp(a.Point, b.Point, u)
+                };
+                return true;
+            }
+
+            return false;
+        }
+
+        private static List<BoundarySample> BuildMaxPairSamples(List<ContourSample> leftContour, List<ContourSample> rightContour)
+        {
+            var result = new List<BoundarySample>();
+            List<ContourSample> leftMaxes = FindContourMaxes(leftContour, true);
+            List<ContourSample> rightMaxes = FindContourMaxes(rightContour, false);
+            int pairCount = Math.Min(leftMaxes.Count, rightMaxes.Count);
+            if (pairCount < 2)
+            {
+                return result;
+            }
+
+            leftMaxes.Sort((a, b) => a.T.CompareTo(b.T));
+            rightMaxes.Sort((a, b) => a.T.CompareTo(b.T));
+            for (int i = 0; i < pairCount; i++)
+            {
+                ContourSample left = leftMaxes[i];
+                ContourSample right = rightMaxes[i];
+                result.Add(new BoundarySample
+                {
+                    T = (left.T + right.T) / 2f,
+                    Left = left.Point,
+                    Right = right.Point,
+                    Center = MidPoint(left.Point, right.Point),
+                    Width = Distance(left.Point, right.Point)
+                });
+            }
+
+            result.Sort((a, b) => a.T.CompareTo(b.T));
+            return result;
+        }
+
+        private static List<ContourSample> FindContourMaxes(List<ContourSample> contour, bool isLeft)
+        {
+            var candidates = new List<ContourSample>();
+            if (contour == null || contour.Count == 0)
+            {
+                return candidates;
+            }
+
+            for (int i = 1; i < contour.Count - 1; i++)
+            {
+                ContourSample prev = contour[i - 1];
+                ContourSample current = contour[i];
+                ContourSample next = contour[i + 1];
+                bool isMax = isLeft
+                    ? current.Side <= prev.Side && current.Side <= next.Side
+                    : current.Side >= prev.Side && current.Side >= next.Side;
+                if (isMax)
+                {
+                    AddSeparatedMax(candidates, current);
+                }
+            }
+
+            if (candidates.Count < 2)
+            {
+                foreach (ContourSample sample in contour)
+                {
+                    AddSeparatedMax(candidates, sample);
+                }
+            }
+
+            candidates.Sort((a, b) => Math.Abs(b.Side).CompareTo(Math.Abs(a.Side)));
+            if (candidates.Count > 2)
+            {
+                candidates.RemoveRange(2, candidates.Count - 2);
+            }
+
+            return candidates;
+        }
+
+        private static void AddSeparatedMax(List<ContourSample> candidates, ContourSample sample)
+        {
+            const float minTGap = 0.18f;
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                ContourSample existing = candidates[i];
+                if (Math.Abs(existing.T - sample.T) > minTGap)
+                {
+                    continue;
+                }
+
+                if (Math.Abs(sample.Side) > Math.Abs(existing.Side))
+                {
+                    candidates[i] = sample;
+                }
+
+                return;
+            }
+
+            candidates.Add(sample);
+        }
+
+        private static bool TryGetBoundarySampleAtT(List<BoundarySample> samples, float t, out BoundarySample sample)
+        {
+            sample = null;
+            if (samples == null || samples.Count < 2)
+            {
+                return false;
+            }
+
+            if (t < samples[0].T)
+            {
+                return false;
+            }
+
+            BoundarySample last = samples[samples.Count - 1];
+            if (t > last.T)
+            {
+                return false;
             }
 
             for (int i = 0; i < samples.Count - 1; i++)
@@ -572,6 +745,13 @@ namespace MidTermproject_21100210
             return new PointF(
                 (a.X + b.X) / 2f,
                 (a.Y + b.Y) / 2f);
+        }
+
+        private static float Distance(PointF a, PointF b)
+        {
+            float dx = a.X - b.X;
+            float dy = a.Y - b.Y;
+            return (float)Math.Sqrt(dx * dx + dy * dy);
         }
 
         private static float Clamp(float value, float min, float max)
