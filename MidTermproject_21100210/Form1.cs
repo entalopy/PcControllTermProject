@@ -44,6 +44,7 @@ namespace MidTermproject_21100210
             txtPointInfo.Text = shapeModel.GetMeasurementInfo();
             txtResultInfo.Text = "Click Read File to load one mask, or Match All Folder Files to process a folder.";
             UpdateDefectThresholdLabel();
+            UpdateManualOrientationState();
             SetNavigationState();
             btnLabelCurrent.Enabled = false;
             btnExportLabels.Enabled = false;
@@ -135,6 +136,11 @@ namespace MidTermproject_21100210
             ShowActiveResultAt(0);
         }
 
+        private void rdoOrientationMode_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateManualOrientationState();
+        }
+
         private void trackIslandBox_Scroll(object sender, EventArgs e)
         {
             UpdateDefectThresholdLabel();
@@ -192,6 +198,7 @@ namespace MidTermproject_21100210
             currentMatchedPoints = null;
             SyncIslandThreshold();
             currentMaskFeatures = analyzer.Analyze(path);
+            ApplySelectedOrientation(currentMaskFeatures);
             pictureMask.Image = LoadBitmapWithoutLock(path);
             pictureResult.Image = LoadBitmapWithoutLock(path);
             lblCurrentFile.Text = Path.GetFileName(path);
@@ -204,6 +211,7 @@ namespace MidTermproject_21100210
         {
             SyncIslandThreshold();
             currentMaskFeatures = analyzer.Analyze(currentMaskPath);
+            ApplySelectedOrientation(currentMaskFeatures);
             if (CanMatch(currentMaskFeatures))
             {
                 currentMatchedPoints = matcher.Match(shapeModel, currentMaskFeatures);
@@ -262,6 +270,7 @@ namespace MidTermproject_21100210
             {
                 string file = files[i];
                 ShapeFeatures features = analyzer.Analyze(file);
+                ApplySelectedOrientation(features);
                 PointF[] points = CanMatch(features) ? matcher.Match(shapeModel, features) : new PointF[0];
                 if (CanMatch(features))
                 {
@@ -1321,6 +1330,68 @@ namespace MidTermproject_21100210
             btnNextResult.Enabled = enabled;
             rdoShowGood.Enabled = goodResultFiles.Count > 0;
             rdoShowBad.Enabled = badResultFiles.Count > 0;
+        }
+
+        private void UpdateManualOrientationState()
+        {
+            bool manual = rdoManualOrientation.Checked;
+            panelShoeSide.Enabled = manual;
+            panelFrontDirection.Enabled = manual;
+            lblShoeSide.Enabled = manual;
+            lblFrontDirection.Enabled = manual;
+        }
+
+        private void ApplySelectedOrientation(ShapeFeatures features)
+        {
+            if (features == null || !rdoManualOrientation.Checked)
+            {
+                return;
+            }
+
+            features.ShoeSide = rdoRightFoot.Checked ? "RIGHT" : "LEFT";
+
+            bool wantsFrontDown = rdoFrontDown.Checked;
+            bool frontIsDown = (-features.AxisX.Y) > 0;
+            if (frontIsDown != wantsFrontDown)
+            {
+                FlipFrontDirection(features);
+            }
+
+            features.RotationAngleDegrees = NormalizeAngleDegrees(Math.Atan2(-features.AxisX.Y, -features.AxisX.X) * 180.0 / Math.PI);
+        }
+
+        private static void FlipFrontDirection(ShapeFeatures features)
+        {
+            features.AxisX = new OpenCvSharp.Point2f(-features.AxisX.X, -features.AxisX.Y);
+            features.FrontSign = -features.FrontSign;
+
+            OpenCvSharp.Point2f centerStart = features.CenterLineStart;
+            features.CenterLineStart = features.CenterLineEnd;
+            features.CenterLineEnd = centerStart;
+
+            OpenCvSharp.Point2f frontStart = features.FrontBallLineStart;
+            OpenCvSharp.Point2f frontEnd = features.FrontBallLineEnd;
+            features.FrontBallLineStart = features.RearBallLineStart;
+            features.FrontBallLineEnd = features.RearBallLineEnd;
+            features.RearBallLineStart = frontStart;
+            features.RearBallLineEnd = frontEnd;
+
+            double frontWidth = features.FrontBallWidth;
+            features.FrontBallWidth = features.RearBallWidth;
+            features.RearBallWidth = frontWidth;
+        }
+
+        private static double NormalizeAngleDegrees(double degrees)
+        {
+            while (degrees <= -180.0)
+            {
+                degrees += 360.0;
+            }
+            while (degrees > 180.0)
+            {
+                degrees -= 360.0;
+            }
+            return degrees;
         }
 
         private void SyncIslandThreshold()

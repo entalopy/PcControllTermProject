@@ -32,6 +32,18 @@
             this.panelFilter = new System.Windows.Forms.Panel();
             this.rdoShowGood = new System.Windows.Forms.RadioButton();
             this.rdoShowBad = new System.Windows.Forms.RadioButton();
+            this.panelOrientationMode = new System.Windows.Forms.Panel();
+            this.rdoAutoOrientation = new System.Windows.Forms.RadioButton();
+            this.rdoManualOrientation = new System.Windows.Forms.RadioButton();
+            this.panelShoeSide = new System.Windows.Forms.Panel();
+            this.rdoLeftFoot = new System.Windows.Forms.RadioButton();
+            this.rdoRightFoot = new System.Windows.Forms.RadioButton();
+            this.panelFrontDirection = new System.Windows.Forms.Panel();
+            this.rdoFrontUp = new System.Windows.Forms.RadioButton();
+            this.rdoFrontDown = new System.Windows.Forms.RadioButton();
+            this.lblOrientationMode = new System.Windows.Forms.Label();
+            this.lblShoeSide = new System.Windows.Forms.Label();
+            this.lblFrontDirection = new System.Windows.Forms.Label();
             this.txtMaskRoot = new System.Windows.Forms.TextBox();
             this.lblCurrentFile = new System.Windows.Forms.Label();
             this.lblBatchSummary = new System.Windows.Forms.Label();
@@ -54,7 +66,7 @@
             // 
             this.pictureReference.BackColor = System.Drawing.Color.White;
             this.pictureReference.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureReference.Location = new System.Drawing.Point(17, 78);
+            this.pictureReference.Location = new System.Drawing.Point(17, 112);
             this.pictureReference.Margin = new System.Windows.Forms.Padding(4);
             this.pictureReference.Name = "pictureReference";
             this.pictureReference.Size = new System.Drawing.Size(442, 779);
@@ -69,7 +81,7 @@
             // 
             this.pictureMask.BackColor = System.Drawing.Color.DimGray;
             this.pictureMask.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureMask.Location = new System.Drawing.Point(483, 78);
+            this.pictureMask.Location = new System.Drawing.Point(483, 112);
             this.pictureMask.Margin = new System.Windows.Forms.Padding(4);
             this.pictureMask.Name = "pictureMask";
             this.pictureMask.Size = new System.Drawing.Size(599, 472);
@@ -81,7 +93,7 @@
             // 
             this.pictureResult.BackColor = System.Drawing.Color.DimGray;
             this.pictureResult.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureResult.Location = new System.Drawing.Point(1106, 78);
+            this.pictureResult.Location = new System.Drawing.Point(1106, 112);
             this.pictureResult.Margin = new System.Windows.Forms.Padding(4);
             this.pictureResult.Name = "pictureResult";
             this.pictureResult.Size = new System.Drawing.Size(599, 472);
@@ -92,7 +104,7 @@
             // txtPointInfo
             // 
             this.txtPointInfo.Font = new System.Drawing.Font("Consolas", 9F);
-            this.txtPointInfo.Location = new System.Drawing.Point(483, 640);
+            this.txtPointInfo.Location = new System.Drawing.Point(483, 674);
             this.txtPointInfo.Margin = new System.Windows.Forms.Padding(4);
             this.txtPointInfo.Multiline = true;
             this.txtPointInfo.Name = "txtPointInfo";
@@ -104,7 +116,7 @@
             // txtResultInfo
             // 
             this.txtResultInfo.Font = new System.Drawing.Font("Consolas", 9F);
-            this.txtResultInfo.Location = new System.Drawing.Point(1106, 640);
+            this.txtResultInfo.Location = new System.Drawing.Point(1106, 674);
             this.txtResultInfo.Margin = new System.Windows.Forms.Padding(4);
             this.txtResultInfo.Multiline = true;
             this.txtResultInfo.Name = "txtResultInfo";
@@ -253,9 +265,152 @@
             this.rdoShowBad.UseVisualStyleBackColor = true;
             this.rdoShowBad.CheckedChanged += new System.EventHandler(this.rdoResultFilter_CheckedChanged);
             // 
+            // panelOrientationMode
+            // 
+            this.panelOrientationMode.Controls.Add(this.rdoManualOrientation);
+            this.panelOrientationMode.Controls.Add(this.rdoAutoOrientation);
+            this.panelOrientationMode.Location = new System.Drawing.Point(620, 67);
+            this.panelOrientationMode.Margin = new System.Windows.Forms.Padding(4);
+            this.panelOrientationMode.Name = "panelOrientationMode";
+            this.panelOrientationMode.Size = new System.Drawing.Size(205, 35);
+            this.panelOrientationMode.TabIndex = 36;
+            // 
+            // rdoAutoOrientation
+            // 
+            this.rdoAutoOrientation.AutoSize = true;
+            this.rdoAutoOrientation.Checked = true;
+            this.rdoAutoOrientation.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
+            this.rdoAutoOrientation.Location = new System.Drawing.Point(0, 5);
+            this.rdoAutoOrientation.Margin = new System.Windows.Forms.Padding(4);
+            this.rdoAutoOrientation.Name = "rdoAutoOrientation";
+            this.rdoAutoOrientation.Size = new System.Drawing.Size(73, 25);
+            this.rdoAutoOrientation.TabIndex = 33;
+            this.rdoAutoOrientation.TabStop = true;
+            this.rdoAutoOrientation.Text = "Auto";
+            this.rdoAutoOrientation.UseVisualStyleBackColor = true;
+            this.rdoAutoOrientation.CheckedChanged += new System.EventHandler(this.rdoOrientationMode_CheckedChanged);
+            // 
+            // rdoManualOrientation
+            // 
+            this.rdoManualOrientation.AutoSize = true;
+            this.rdoManualOrientation.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
+            this.rdoManualOrientation.Location = new System.Drawing.Point(94, 5);
+            this.rdoManualOrientation.Margin = new System.Windows.Forms.Padding(4);
+            this.rdoManualOrientation.Name = "rdoManualOrientation";
+            this.rdoManualOrientation.Size = new System.Drawing.Size(94, 25);
+            this.rdoManualOrientation.TabIndex = 34;
+            this.rdoManualOrientation.Text = "Manual";
+            this.rdoManualOrientation.UseVisualStyleBackColor = true;
+            this.rdoManualOrientation.CheckedChanged += new System.EventHandler(this.rdoOrientationMode_CheckedChanged);
+            // 
+            // panelShoeSide
+            // 
+            this.panelShoeSide.Controls.Add(this.rdoRightFoot);
+            this.panelShoeSide.Controls.Add(this.rdoLeftFoot);
+            this.panelShoeSide.Location = new System.Drawing.Point(956, 67);
+            this.panelShoeSide.Margin = new System.Windows.Forms.Padding(4);
+            this.panelShoeSide.Name = "panelShoeSide";
+            this.panelShoeSide.Size = new System.Drawing.Size(190, 35);
+            this.panelShoeSide.TabIndex = 37;
+            // 
+            // rdoLeftFoot
+            // 
+            this.rdoLeftFoot.AutoSize = true;
+            this.rdoLeftFoot.Checked = true;
+            this.rdoLeftFoot.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
+            this.rdoLeftFoot.Location = new System.Drawing.Point(0, 5);
+            this.rdoLeftFoot.Margin = new System.Windows.Forms.Padding(4);
+            this.rdoLeftFoot.Name = "rdoLeftFoot";
+            this.rdoLeftFoot.Size = new System.Drawing.Size(70, 25);
+            this.rdoLeftFoot.TabIndex = 35;
+            this.rdoLeftFoot.TabStop = true;
+            this.rdoLeftFoot.Text = "Left";
+            this.rdoLeftFoot.UseVisualStyleBackColor = true;
+            // 
+            // rdoRightFoot
+            // 
+            this.rdoRightFoot.AutoSize = true;
+            this.rdoRightFoot.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
+            this.rdoRightFoot.Location = new System.Drawing.Point(88, 5);
+            this.rdoRightFoot.Margin = new System.Windows.Forms.Padding(4);
+            this.rdoRightFoot.Name = "rdoRightFoot";
+            this.rdoRightFoot.Size = new System.Drawing.Size(82, 25);
+            this.rdoRightFoot.TabIndex = 36;
+            this.rdoRightFoot.Text = "Right";
+            this.rdoRightFoot.UseVisualStyleBackColor = true;
+            // 
+            // panelFrontDirection
+            // 
+            this.panelFrontDirection.Controls.Add(this.rdoFrontDown);
+            this.panelFrontDirection.Controls.Add(this.rdoFrontUp);
+            this.panelFrontDirection.Location = new System.Drawing.Point(1284, 67);
+            this.panelFrontDirection.Margin = new System.Windows.Forms.Padding(4);
+            this.panelFrontDirection.Name = "panelFrontDirection";
+            this.panelFrontDirection.Size = new System.Drawing.Size(190, 35);
+            this.panelFrontDirection.TabIndex = 38;
+            // 
+            // rdoFrontUp
+            // 
+            this.rdoFrontUp.AutoSize = true;
+            this.rdoFrontUp.Checked = true;
+            this.rdoFrontUp.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
+            this.rdoFrontUp.Location = new System.Drawing.Point(0, 5);
+            this.rdoFrontUp.Margin = new System.Windows.Forms.Padding(4);
+            this.rdoFrontUp.Name = "rdoFrontUp";
+            this.rdoFrontUp.Size = new System.Drawing.Size(56, 25);
+            this.rdoFrontUp.TabIndex = 37;
+            this.rdoFrontUp.TabStop = true;
+            this.rdoFrontUp.Text = "Up";
+            this.rdoFrontUp.UseVisualStyleBackColor = true;
+            // 
+            // rdoFrontDown
+            // 
+            this.rdoFrontDown.AutoSize = true;
+            this.rdoFrontDown.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
+            this.rdoFrontDown.Location = new System.Drawing.Point(78, 5);
+            this.rdoFrontDown.Margin = new System.Windows.Forms.Padding(4);
+            this.rdoFrontDown.Name = "rdoFrontDown";
+            this.rdoFrontDown.Size = new System.Drawing.Size(80, 25);
+            this.rdoFrontDown.TabIndex = 38;
+            this.rdoFrontDown.Text = "Down";
+            this.rdoFrontDown.UseVisualStyleBackColor = true;
+            // 
+            // lblOrientationMode
+            // 
+            this.lblOrientationMode.AutoSize = true;
+            this.lblOrientationMode.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
+            this.lblOrientationMode.Location = new System.Drawing.Point(483, 73);
+            this.lblOrientationMode.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblOrientationMode.Name = "lblOrientationMode";
+            this.lblOrientationMode.Size = new System.Drawing.Size(126, 21);
+            this.lblOrientationMode.TabIndex = 39;
+            this.lblOrientationMode.Text = "Run Direction";
+            // 
+            // lblShoeSide
+            // 
+            this.lblShoeSide.AutoSize = true;
+            this.lblShoeSide.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
+            this.lblShoeSide.Location = new System.Drawing.Point(848, 73);
+            this.lblShoeSide.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblShoeSide.Name = "lblShoeSide";
+            this.lblShoeSide.Size = new System.Drawing.Size(95, 21);
+            this.lblShoeSide.TabIndex = 40;
+            this.lblShoeSide.Text = "Shoe Side";
+            // 
+            // lblFrontDirection
+            // 
+            this.lblFrontDirection.AutoSize = true;
+            this.lblFrontDirection.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
+            this.lblFrontDirection.Location = new System.Drawing.Point(1170, 73);
+            this.lblFrontDirection.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblFrontDirection.Name = "lblFrontDirection";
+            this.lblFrontDirection.Size = new System.Drawing.Size(96, 21);
+            this.lblFrontDirection.TabIndex = 41;
+            this.lblFrontDirection.Text = "Front Side";
+            // 
             // txtMaskRoot
             // 
-            this.txtMaskRoot.Location = new System.Drawing.Point(483, 915);
+            this.txtMaskRoot.Location = new System.Drawing.Point(483, 949);
             this.txtMaskRoot.Margin = new System.Windows.Forms.Padding(4);
             this.txtMaskRoot.Name = "txtMaskRoot";
             this.txtMaskRoot.Size = new System.Drawing.Size(1221, 28);
@@ -264,7 +419,7 @@
             // lblCurrentFile
             // 
             this.lblCurrentFile.AutoSize = true;
-            this.lblCurrentFile.Location = new System.Drawing.Point(483, 561);
+            this.lblCurrentFile.Location = new System.Drawing.Point(483, 595);
             this.lblCurrentFile.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblCurrentFile.Name = "lblCurrentFile";
             this.lblCurrentFile.Size = new System.Drawing.Size(108, 18);
@@ -276,7 +431,7 @@
             this.lblBatchSummary.AutoSize = true;
             this.lblBatchSummary.Font = new System.Drawing.Font("Arial", 10F, System.Drawing.FontStyle.Bold);
             this.lblBatchSummary.ForeColor = System.Drawing.Color.DarkGreen;
-            this.lblBatchSummary.Location = new System.Drawing.Point(1106, 561);
+            this.lblBatchSummary.Location = new System.Drawing.Point(1106, 595);
             this.lblBatchSummary.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblBatchSummary.Name = "lblBatchSummary";
             this.lblBatchSummary.Size = new System.Drawing.Size(234, 24);
@@ -286,7 +441,7 @@
             // lblStatus
             // 
             this.lblStatus.AutoSize = true;
-            this.lblStatus.Location = new System.Drawing.Point(17, 915);
+            this.lblStatus.Location = new System.Drawing.Point(17, 949);
             this.lblStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Size = new System.Drawing.Size(59, 18);
@@ -295,7 +450,7 @@
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(483, 879);
+            this.progressBar.Location = new System.Drawing.Point(483, 913);
             this.progressBar.Margin = new System.Windows.Forms.Padding(4);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(1223, 32);
@@ -303,7 +458,7 @@
             // 
             // trackIslandBox
             // 
-            this.trackIslandBox.Location = new System.Drawing.Point(483, 956);
+            this.trackIslandBox.Location = new System.Drawing.Point(483, 990);
             this.trackIslandBox.Margin = new System.Windows.Forms.Padding(4);
             this.trackIslandBox.Maximum = 60;
             this.trackIslandBox.Minimum = 1;
@@ -318,7 +473,7 @@
             // 
             this.lblIslandBox.AutoSize = true;
             this.lblIslandBox.Font = new System.Drawing.Font("Arial", 10F, System.Drawing.FontStyle.Bold);
-            this.lblIslandBox.Location = new System.Drawing.Point(1063, 963);
+            this.lblIslandBox.Location = new System.Drawing.Point(1063, 997);
             this.lblIslandBox.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblIslandBox.Name = "lblIslandBox";
             this.lblIslandBox.Size = new System.Drawing.Size(273, 24);
@@ -329,7 +484,7 @@
             // 
             this.labelReference.AutoSize = true;
             this.labelReference.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
-            this.labelReference.Location = new System.Drawing.Point(17, 46);
+            this.labelReference.Location = new System.Drawing.Point(17, 80);
             this.labelReference.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelReference.Name = "labelReference";
             this.labelReference.Size = new System.Drawing.Size(252, 21);
@@ -340,7 +495,7 @@
             // 
             this.labelMask.AutoSize = true;
             this.labelMask.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
-            this.labelMask.Location = new System.Drawing.Point(483, 46);
+            this.labelMask.Location = new System.Drawing.Point(483, 80);
             this.labelMask.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelMask.Name = "labelMask";
             this.labelMask.Size = new System.Drawing.Size(104, 21);
@@ -351,7 +506,7 @@
             // 
             this.labelResult.AutoSize = true;
             this.labelResult.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
-            this.labelResult.Location = new System.Drawing.Point(1106, 46);
+            this.labelResult.Location = new System.Drawing.Point(1106, 80);
             this.labelResult.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelResult.Name = "labelResult";
             this.labelResult.Size = new System.Drawing.Size(123, 21);
@@ -360,7 +515,7 @@
             // 
             // btnLabelCurrent
             // 
-            this.btnLabelCurrent.Location = new System.Drawing.Point(1346, 956);
+            this.btnLabelCurrent.Location = new System.Drawing.Point(1346, 990);
             this.btnLabelCurrent.Margin = new System.Windows.Forms.Padding(4);
             this.btnLabelCurrent.Name = "btnLabelCurrent";
             this.btnLabelCurrent.Size = new System.Drawing.Size(158, 42);
@@ -371,7 +526,7 @@
             // 
             // btnExportLabels
             // 
-            this.btnExportLabels.Location = new System.Drawing.Point(1512, 956);
+            this.btnExportLabels.Location = new System.Drawing.Point(1512, 990);
             this.btnExportLabels.Margin = new System.Windows.Forms.Padding(4);
             this.btnExportLabels.Name = "btnExportLabels";
             this.btnExportLabels.Size = new System.Drawing.Size(192, 42);
@@ -383,7 +538,13 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1726, 1035);
+            this.ClientSize = new System.Drawing.Size(1726, 1069);
+            this.Controls.Add(this.lblFrontDirection);
+            this.Controls.Add(this.lblShoeSide);
+            this.Controls.Add(this.lblOrientationMode);
+            this.Controls.Add(this.panelFrontDirection);
+            this.Controls.Add(this.panelShoeSide);
+            this.Controls.Add(this.panelOrientationMode);
             this.Controls.Add(this.btnExportLabels);
             this.Controls.Add(this.btnLabelCurrent);
             this.Controls.Add(this.panelFilter);
@@ -438,6 +599,18 @@
         private System.Windows.Forms.Panel panelFilter;
         private System.Windows.Forms.RadioButton rdoShowGood;
         private System.Windows.Forms.RadioButton rdoShowBad;
+        private System.Windows.Forms.Panel panelOrientationMode;
+        private System.Windows.Forms.RadioButton rdoAutoOrientation;
+        private System.Windows.Forms.RadioButton rdoManualOrientation;
+        private System.Windows.Forms.Panel panelShoeSide;
+        private System.Windows.Forms.RadioButton rdoLeftFoot;
+        private System.Windows.Forms.RadioButton rdoRightFoot;
+        private System.Windows.Forms.Panel panelFrontDirection;
+        private System.Windows.Forms.RadioButton rdoFrontUp;
+        private System.Windows.Forms.RadioButton rdoFrontDown;
+        private System.Windows.Forms.Label lblOrientationMode;
+        private System.Windows.Forms.Label lblShoeSide;
+        private System.Windows.Forms.Label lblFrontDirection;
         private System.Windows.Forms.TextBox txtMaskRoot;
         private System.Windows.Forms.Label lblCurrentFile;
         private System.Windows.Forms.Label lblBatchSummary;
